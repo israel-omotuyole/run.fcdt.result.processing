@@ -300,8 +300,13 @@
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-5 sm:p-6 border border-slate-200 animate-in fade-in zoom-in duration-150">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-sm sm:text-base font-bold text-slate-900">Upload Result File</h3>
-                <button onclick="document.getElementById('uploadModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 p-1">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <button type="button" 
+                        onclick="document.getElementById('clearRecordsModal').classList.remove('hidden')"
+                        class="inline-flex items-center justify-center px-3.5 py-2 text-xs sm:text-sm font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 transition shadow-xs cursor-pointer">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Clear Level Records
                 </button>
             </div>
             
@@ -358,6 +363,37 @@
             </div>
             <div class="flex justify-end mt-4 pt-3 border-t border-slate-100">
                 <button type="button" onclick="document.getElementById('sheetModal').classList.add('hidden')" class="px-4 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">Close</button>
+            </div>
+        </div>
+    </div>
+    <!-- Clear Level Records Confirmation Modal -->
+    <div id="clearRecordsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+        <div class="bg-white rounded-xl shadow-xl border border-slate-200 max-w-sm w-full p-6 text-center animate-fade-in">
+            <!-- Trash Warning Icon -->
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-rose-50 border border-rose-100 mb-4">
+                <svg class="h-6 w-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+
+            <h3 class="text-base font-bold text-slate-900 mb-1">Clear Semester Records?</h3>
+            <p class="text-xs text-slate-500 mb-6 leading-relaxed">
+                This will permanently delete all uploaded student results and grades for 
+                <span class="font-bold text-slate-800"><?= htmlspecialchars($active_dept ?? 'Department') ?> — <?= htmlspecialchars($active_level ?? '') ?>L (<?= htmlspecialchars($active_semester ?? 'First Semester') ?>)</span>. 
+                Other levels and semesters will not be affected.
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-center space-x-3">
+                <button type="button" 
+                        onclick="document.getElementById('clearRecordsModal').classList.add('hidden')"
+                        class="flex-1 px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition cursor-pointer">
+                    Cancel
+                </button>
+                <a href="<?= site_url('result/reset_session_records') ?>" 
+                class="flex-1 px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition shadow-xs">
+                    Yes, Wipe Data
+                </a>
             </div>
         </div>
     </div>

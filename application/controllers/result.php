@@ -428,31 +428,40 @@ class Result extends CI_Controller {
     }
 
     public function reset_session_records() {
-        // Ensure only Exam Officers can trigger a reset
-        if ($this->session->userdata('role') !== 'exam_officer') {
-            show_error('Unauthorized action.', 403, 'Access Denied');
-            return;
-        }
+        $active_level    = $this->session->userdata('active_level') ?? 400;
+        $active_dept     = $this->session->userdata('active_dept') ?? 'Information Technology';
+        $active_session  = $this->session->userdata('active_session') ?? '2025/2026';
+        $active_semester = $this->session->userdata('active_semester') ?? 'First Semester';
 
-        $active_level   = $this->session->userdata('active_level') ?? 400;
-        $active_dept    = $this->session->userdata('active_dept') ?? 'Information Technology';
-        $active_session = $this->session->userdata('active_session') ?? '2025/2026';
+        $this->db->where(array(
+            'department'       => $active_dept,
+            'level'            => $active_level,
+            'academic_session' => $active_session,
+            'semester'         => $active_semester
+        ));
+        $session_query = $this->db->get('faculty_audit_sessions');
 
-        // Find the active audit session ID for this department, level, and session
-        $this->db->where('department', $active_dept);
-        $this->db->where('level', $active_level);
-        $this->db->where('academic_session', $active_session);
-        $session_row = $this->db->get('faculty_audit_sessions')->row();
+        if ($session_query->num_rows() > 0) {
+            $session_id = $session_query->row()->id;
 
-        if ($session_row) {
-            // Deleting the session record automatically cascades and wipes out 
-            // all student records and individual grades linked to it via foreign keys.
-            $this->db->where('id', $session_row->id);
+            // Delete grades for all students in this specific session
+            $this->db->where('audit_session_id', $session_id);
+            $students = $this->db->get('faculty_audit_students')->result_array();
+            foreach ($students as $stu) {
+                $this->db->where('student_id', $stu['id']);
+                $this->db->delete('faculty_audit_grades');
+            }
+
+            // Delete students & the session record itself
+            $this->db->where('audit_session_id', $session_id);
+            $this->db->delete('faculty_audit_students');
+
+            $this->db->where('id', $session_id);
             $this->db->delete('faculty_audit_sessions');
+
+            $this->session->set_flashdata('success', 'Records for ' . $active_level . 'L (' . $active_semester . ') have been cleared.');
         }
 
-        // Redirect back to the dashboard with success feedback
-        $this->session->set_flashdata('success', 'Level records have been cleared successfully.');
         redirect('result');
     }
 }
